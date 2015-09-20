@@ -15,4 +15,4 @@ resolvers	++=	Seq(
 
 libraryDependencies	+=	"commons-io"	%	"commons-io"	%	"2.4"
 
-fork	:=	false
+fork	:=	true
