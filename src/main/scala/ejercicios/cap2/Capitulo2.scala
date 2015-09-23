@@ -1,6 +1,9 @@
 package ejercicios.cap2
 
 import concurrencia._
+import ejemplos.cap2.SynchronizedNesting.Account
+import ejemplos.cap2.SynchronizedAccounts.send
+import scala.collection.mutable.Queue
 
 object Capitulo2 {
   // 1
@@ -14,7 +17,7 @@ object Capitulo2 {
       res2 = b
     }
     t1.join()
-    t2.join
+    t2.join()
 
     (res1, res2)
   }
@@ -40,21 +43,37 @@ object Capitulo2 {
         val aux = x
         x = null.asInstanceOf[T]
         aux
-      } else throw Exception
+      } else throw new Exception
     }
 
     def put(t: T): Unit = this.synchronized {
       if (x == null) x = t
-      else throw Exception
+      else throw new Exception
     }
 
     // ejercicio 4
-    def isEmpty: Boolean = synchronized {x == null}
-    def nonEmpty: Boolean = synchronized {x != null}
+    def isEmpty: Boolean = synchronized {
+      x == null
+    }
+
+    def nonEmpty: Boolean = synchronized {
+      x != null
+    }
 
     // ejercicio 5
-    def getWait(): T = ???
-    def putWait(): Unit = ???
+    def getWait(): T = this.synchronized {
+      while (x == null) {}
+      val aux = x
+      x = null.asInstanceOf[T]
+      aux
+    }
+
+
+    def putWait(t: T): Unit = this.synchronized {
+      while (x != null) {}
+      x = t
+    }
+
   }
 
   // ejercicio 4 parte 2
@@ -64,7 +83,7 @@ object Capitulo2 {
 
     val producer = thread {
       while (x < 15) {
-        if (syncVar.isEmpty){
+        if (syncVar.isEmpty) {
           syncVar.put(x)
           x += 1
         }
@@ -84,6 +103,45 @@ object Capitulo2 {
     consumer.join()
   }
 
+  class SyncQueue[T](val n: Int)  {
+    val queue: Queue[SyncVar[T]] = Queue[SyncVar[T]]()
+
+    def get(): T = queue.dequeue().get()
+
+    def put(t: T): Unit = {
+      val sv = new SyncVar[T]
+      sv.put(t)
+      queue.enqueue(sv)
+    }
+  }
+
+  // Ejercicio 7
+
+  def	sendAll(accounts:	Set[Account],	target:	Account):	Unit = {
+    accounts.map{ (a : Account) => send(a,target,a.money)}
+  }
+
+  // Ejercicio 8 (DIficil)
+  type Task = () => Unit
+  class PriorityTaskPool {
+    private val queue: Queue[Task] = Queue[Task]()
+    private var maxPriority = 0
+    def asynchronous(priority: Int)(task: =>Unit): Unit = queue.synchronized {
+      if (priority > maxPriority) {
+        maxPriority = priority
+        queue.so
+      } else {
+
+      }
+        queue.enqueue(() => task)
+      queue.notify()
+    }
+
+
+  }
+  // Ejercicio 9 (Continuacion del Dificil)
+
+  // Ejercicio 10 (Continuacion de la continuacion del dificil)
 
 
 }

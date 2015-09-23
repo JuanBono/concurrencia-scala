@@ -165,8 +165,8 @@ object SynchronizedNesting extends App {
   val t3 = thread {
     add(jane, 70)
   }
-  t1.join();
-  t2.join();
+  t1.join()
+  t2.join()
   t3.join()
   log(s"---transfers ---\n $transfers ")
 }
@@ -334,7 +334,7 @@ object SynchronizedPool extends App {
   Worker.start()
 
   def asynchronous(body: => Unit) = tasks.synchronized {
-    tasks.enqueue(() => Unit)
+    tasks.enqueue(() => body)
     tasks.notify()
   }
 
